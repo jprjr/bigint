@@ -1,0 +1,15 @@
+/coverage
+*.o
+*.exe
+/utest-byte
+/utest-byte-single
+/utest-byte-static
+/utest-short
+/utest-short-single
+/utest-short-static
+/utest-word
+/utest-word-single
+/utest-word-static
+/utest-quad
+/utest-quad-single
+/utest-quad-static
