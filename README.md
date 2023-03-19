@@ -169,7 +169,7 @@ Finally there's a function to write the bigint out as a string. It accepts
 a buffer, the size of the buffer, and the base to use. Notably, it does NOT write out a NULL
 character. It *does* include a prefix based on the base:
 
-* base 2 - prefix with 'b'
+* base 2 - prefix with '0b'
 * base 8 - prefix with '0'
 * base 16 - prefix with '0x'
 
