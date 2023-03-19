@@ -107,8 +107,7 @@ You can copy bigints:
 bigint_copy(&dup,&b); /* dup now has the same data as b */
 ```
 
-You can increment/decrement a bigint:
-
+You can increment, decrement, add, subtract, multiply, and divide bigints.
 
 Functions do not modify your input arguments.
 
