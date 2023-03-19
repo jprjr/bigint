@@ -138,8 +138,8 @@ bigint_div_mod(&q, &r, &a, &b);
 There's also left-shifting and right-shifting:
 
 ```c
-bigint_lshift(&res, &a, 128); /* equivalent to res = a << 128
-bigint_rshift(&res, &a, 128); /* equivalent to res = a >> 128
+bigint_lshift(&res, &a, 128); /* equivalent to res = a << 128 */
+bigint_rshift(&res, &a, 128); /* equivalent to res = a >> 128 */
 ```
 
 All functions work on temporary values and perform a copy at the end,
