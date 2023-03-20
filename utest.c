@@ -2607,4 +2607,40 @@ UTEST(bigint,from_int64) {
 
     bigint_free(&a);
 }
+
+UTEST(bigint,cmp) {
+    PREAMBLE
+
+    ASSERT_EQ(bigint_cmp(&a,&b),0);
+    ASSERT_EQ(bigint_cmp(&b,&a),0);
+
+    ASSERT_EQ(bigint_from_u8(&a,1),0);
+    ASSERT_EQ(bigint_cmp(&a,&b),1);
+    ASSERT_EQ(bigint_cmp(&b,&a),-1);
+
+    ASSERT_EQ(bigint_from_u8(&b,1),0);
+
+    ASSERT_EQ(bigint_cmp(&a,&b),0);
+    ASSERT_EQ(bigint_cmp(&b,&a),0);
+
+    ASSERT_EQ(bigint_from_u8(&a,0),0);
+    ASSERT_EQ(bigint_cmp(&a,&b),-1);
+    ASSERT_EQ(bigint_cmp(&b,&a),1);
+
+    ASSERT_EQ(bigint_from_u8(&a,1),0);
+    a.sign = 1;
+    ASSERT_EQ(bigint_cmp(&a,&b),-1);
+    ASSERT_EQ(bigint_cmp(&b,&a),1);
+
+    b.sign = 1;
+    ASSERT_EQ(bigint_cmp(&a,&b),0);
+    ASSERT_EQ(bigint_cmp(&b,&a),0);
+
+    a.sign = 0;
+    ASSERT_EQ(bigint_cmp(&a,&b),1);
+    ASSERT_EQ(bigint_cmp(&b,&a),-1);
+
+    CLEANUP
+}
+
 UTEST_MAIN();

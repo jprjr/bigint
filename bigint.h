@@ -147,6 +147,9 @@ BIGINT_API
 size_t bigint_to_string(char* str, size_t len, const bigint* b, unsigned int base);
 
 BIGINT_API
+int bigint_cmp(const bigint *a, const bigint *b);
+
+BIGINT_API
 int bigint_inc(bigint* c, const bigint *a);
 
 BIGINT_API
@@ -164,13 +167,6 @@ int bigint_mul(bigint* c, const bigint* a, const bigint* b);
 BIGINT_API
 int bigint_div_mod(bigint* quotient, bigint* remainder, const bigint* numerator, const bigint* denominator);
 
-/* faster div_mod for when you're dividing by a regular, positive word type - note that this
- * overwrites numerator! roughly equivalent to:
- * remainder = numerator % denominator
- * numerator /= denominator */
-BIGINT_API
-void bigint_div_mod_word(bigint* numerator, bigint_word* remainder, bigint_word denominator);
-
 BIGINT_API
 int bigint_lshift(bigint* c, const bigint* a, size_t bits);
 
@@ -182,6 +178,13 @@ int bigint_lshift_overwrite(bigint* a, size_t bits);
 
 BIGINT_API
 int bigint_rshift_overwrite(bigint* a, size_t bits);
+
+/* faster div_mod for when you're dividing by a regular, positive word type - note that this
+ * overwrites numerator! roughly equivalent to:
+ * remainder = numerator % denominator
+ * numerator /= denominator */
+BIGINT_API
+void bigint_div_mod_word(bigint* numerator, bigint_word* remainder, bigint_word denominator);
 
 #ifdef __cplusplus
 }
@@ -1621,6 +1624,14 @@ size_t bigint_to_string(char* str, size_t len, const bigint* b, unsigned int bas
 
     if(res != 0) res += u;
     return res;
+}
+
+BIGINT_API
+int bigint_cmp(const bigint *a, const bigint *b) {
+    if(!a->size && !b->size) return 0;
+    if(a->sign && b->sign) return bigint_cmp_abs(b,a);
+    if(a->sign == b->sign) return bigint_cmp_abs(a,b);
+    return a->sign && !b->sign ? -1 : 1;
 }
 
 #endif

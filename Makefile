@@ -8,7 +8,7 @@ all: utest-byte utest-short utest-word utest-quad \
      utest-byte-single utest-short-single utest-word-single utest-quad-single \
 	 utest-coverage bigint.o
 
-test: utest-byte utest-short utest-word utest-quad utest-byte-single utest-short-single utest-word-single utest-quad-single utest-coverage
+test: utest-byte utest-short utest-word utest-quad utest-byte-single utest-short-single utest-word-single utest-quad-single utest-byte-static utest-short-static utest-word-static utest-quad-static utest-coverage
 	./utest-byte >/dev/null 2>&1 || ./utest-byte
 	./utest-short >/dev/null 2>&1 || ./utest-short
 	./utest-word >/dev/null 2>&1 || ./utest-word
