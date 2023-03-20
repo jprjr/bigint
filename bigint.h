@@ -259,12 +259,12 @@ const bigint* BIGINT_ZERO = &BIGINT_ZERO_STORAGE;
 
 static void bigint_reset(bigint* b);
 static int  bigint_resize(bigint* b, size_t size);
-static void bigint_truncate(bigint* b);
+static inline void bigint_truncate(bigint* b);
 static int  bigint_append(bigint* b, bigint_word val);
 
 static int bigint_add_word(bigint* b, bigint_word val);
 
-static size_t bigint_word_bitlength(bigint_word a);
+static inline size_t bigint_word_bitlength(bigint_word a);
 static int bigint_word_add(bigint_word *a, bigint_word b);
 static int bigint_word_sub(bigint_word *a, bigint_word b);
 static bigint_word bigint_word_mul(bigint_word *a, bigint_word b);
@@ -346,7 +346,7 @@ int bigint_resize(bigint* b, size_t size) {
     return 0;
 }
 
-static
+static inline
 void bigint_truncate(bigint* b) {
     while(b->size && b->words[b->size - 1] == 0) b->size--;
     b->sign = b->size && b->sign;
@@ -361,7 +361,6 @@ size_t bigint_word_bitlength(bigint_word a) {
    return (size_t)++index;
 #elif defined(_WIN64) && BIGINT_WORD_WIDTH == 8
    unsigned long index;
-   unsigned long m = (unsigned long)a;
    _BitScanReverse64(&index,a);
    return (size_t)++index;
 #elif __GNUC__ > 4 || \
