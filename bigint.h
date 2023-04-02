@@ -144,6 +144,57 @@ BIGINT_API
 int bigint_from_cstring(bigint* b, const char* str, unsigned int base);
 
 BIGINT_API
+int bigint_from_u8(bigint* b, uint8_t val);
+
+BIGINT_API
+int bigint_from_i8(bigint* b, int8_t val);
+
+BIGINT_API
+int bigint_from_u16(bigint* b, uint16_t val);
+
+BIGINT_API
+int bigint_from_i16(bigint* b, int16_t val);
+
+BIGINT_API
+int bigint_from_u32(bigint* b, uint32_t val);
+
+BIGINT_API
+int bigint_from_i32(bigint* b, int32_t val);
+
+BIGINT_API
+int bigint_from_u64(bigint* b, uint64_t val);
+
+BIGINT_API
+int bigint_from_i64(bigint* b, int64_t val);
+
+/* bigint_to functions return 0 on success, 1 if the
+ * bigint won't fit into the type */
+
+BIGINT_API
+int bigint_to_u8(uint8_t *val, const bigint* b);
+
+BIGINT_API
+int bigint_to_i8(int8_t *val, const bigint* b);
+
+BIGINT_API
+int bigint_to_u16(uint16_t * val, const bigint* b);
+
+BIGINT_API
+int bigint_to_i16(int16_t * val, const bigint* b);
+
+BIGINT_API
+int bigint_to_u32(uint32_t * val, const bigint* b);
+
+BIGINT_API
+int bigint_to_i32(int32_t * val, const bigint* b);
+
+BIGINT_API
+int bigint_to_u64(uint64_t * val, const bigint* b);
+
+BIGINT_API
+int bigint_to_i64(int64_t * val, const bigint* b);
+
+BIGINT_API
 size_t bigint_to_string(char* str, size_t len, const bigint* b, unsigned int base);
 
 BIGINT_API
@@ -185,6 +236,7 @@ int bigint_rshift_overwrite(bigint* a, size_t bits);
  * numerator /= denominator */
 BIGINT_API
 void bigint_div_mod_word(bigint* numerator, bigint_word* remainder, bigint_word denominator);
+
 
 #ifdef __cplusplus
 }
@@ -1121,12 +1173,14 @@ int bigint_copy(bigint *dest, const bigint *src) {
 BIGINT_API
 int bigint_from_word(bigint* b, bigint_word val) {
     bigint_reset(b);
+    if(!val) return 0;
     return bigint_append(b,val);
 }
 
 BIGINT_API
 int bigint_from_u8(bigint* b, uint8_t val) {
     bigint_reset(b);
+    if(!val) return 0;
     return bigint_append(b, (bigint_word)(val & BIGINT_WORD_MASK) );
 }
 
@@ -1134,6 +1188,7 @@ BIGINT_API
 int bigint_from_u16(bigint* b, uint16_t val) {
     int r;
     bigint_reset(b);
+    if(!val) return 0;
 #if BIGINT_WORD_WIDTH < 2
     while(val) {
         r = bigint_append(b, (bigint_word)(val & BIGINT_WORD_MASK));
@@ -1150,6 +1205,7 @@ BIGINT_API
 int bigint_from_u32(bigint* b, uint32_t val) {
     int r;
     bigint_reset(b);
+    if(!val) return 0;
 #if BIGINT_WORD_WIDTH < 4
     while(val) {
         r = bigint_append(b, (bigint_word)(val & BIGINT_WORD_MASK));
@@ -1166,6 +1222,7 @@ BIGINT_API
 int bigint_from_u64(bigint* b, uint64_t val) {
     int r;
     bigint_reset(b);
+    if(!val) return 0;
 #if BIGINT_WORD_WIDTH < 8
     while(val) {
         r = bigint_append(b, (bigint_word)(val & BIGINT_WORD_MASK));
@@ -1219,6 +1276,127 @@ int bigint_from_i64(bigint* b, int64_t val) {
     r = bigint_from_u64(b, uval);
     if(r) return r;
     b->sign = val < 0;
+    return 0;
+}
+
+static inline
+uint64_t bigint_to_u64_internal(const bigint* b) {
+    uint64_t tmp = 0;
+    size_t i = b->size;
+
+#if BIGINT_WORD_WIDTH == 8
+    if(i) tmp = b->words[0];
+#else
+    while(i--) {
+        tmp <<= BIGINT_WORD_BIT;
+        tmp += b->words[i] & BIGINT_WORD_MASK;
+    }
+#endif
+
+    return tmp;
+}
+
+BIGINT_API
+int bigint_to_u8(uint8_t *val, const bigint* b) {
+    uint64_t tmp = 0;
+
+    if(bigint_bitlength(b) > 8) return 1;
+    if(b->size) {
+        tmp = bigint_to_u64_internal(b);
+    }
+    *val = (uint8_t)tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_i8(int8_t *val, const bigint* b) {
+    uint8_t tmp = 0;
+    uint8_t max = INT8_MAX;
+    int r = 0;
+
+    if( (r = bigint_to_u8(&tmp,b)) != 0) return r;
+    max += !!b->sign;
+    if(tmp > max) return 1;
+
+    *val = b->sign ? -tmp : tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_u16(uint16_t *val, const bigint* b) {
+    uint64_t tmp = 0;
+
+    if(bigint_bitlength(b) > 16) return 1;
+    if(b->size) {
+        tmp = bigint_to_u64_internal(b);
+    }
+    *val = (uint16_t)tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_i16(int16_t *val, const bigint* b) {
+    uint16_t tmp = 0;
+    uint16_t max = INT16_MAX;
+    int r = 0;
+
+    if( (r = bigint_to_u16(&tmp,b)) != 0) return r;
+    max += !!b->sign;
+    if(tmp > max) return 1;
+
+    *val = b->sign ? -tmp : tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_u32(uint32_t *val, const bigint* b) {
+    uint64_t tmp = 0;
+
+    if(bigint_bitlength(b) > 32) return 1;
+    if(b->size) {
+        tmp = bigint_to_u64_internal(b);
+    }
+    *val = (uint32_t)tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_i32(int32_t *val, const bigint* b) {
+    uint32_t tmp = 0;
+    uint32_t max = INT32_MAX;
+    int r = 0;
+
+    if( (r = bigint_to_u32(&tmp,b)) != 0) return r;
+    max += !!b->sign;
+    if(tmp > max) return 1;
+
+    *val = b->sign ? -tmp : tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_u64(uint64_t *val, const bigint* b) {
+    uint64_t tmp = 0;
+
+    if(bigint_bitlength(b) > 64) return 1;
+    if(b->size) {
+        tmp = bigint_to_u64_internal(b);
+    }
+    *val = (uint64_t)tmp;
+    return 0;
+}
+
+BIGINT_API
+int bigint_to_i64(int64_t *val, const bigint* b) {
+    uint64_t tmp = 0;
+    uint64_t max = INT64_MAX;
+    int r = 0;
+
+    if( (r = bigint_to_u64(&tmp,b)) != 0) return r;
+    max += !!b->sign;
+    if(tmp > max) return 1;
+
+    *val = b->sign ? -tmp : tmp;
     return 0;
 }
 

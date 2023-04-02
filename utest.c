@@ -2505,6 +2505,17 @@ UTEST(bigint,from_int16) {
     ASSERT_WEQ(a.words[0],0x8000);
 #endif
 
+    ASSERT_EQ(bigint_from_i16(&a,INT16_MAX),0);
+    ASSERT_EQ(a.sign,(size_t)0);
+#if BIGINT_WORD_WIDTH == 1
+    ASSERT_WEQ(a.size,2);
+    ASSERT_WEQ(a.words[0],0xFF);
+    ASSERT_WEQ(a.words[1],0x7F);
+#else
+    ASSERT_WEQ(a.size,1);
+    ASSERT_WEQ(a.words[0],0x7FFF);
+#endif
+
     bigint_free(&a);
 }
 
@@ -2641,6 +2652,186 @@ UTEST(bigint,cmp) {
     ASSERT_EQ(bigint_cmp(&b,&a),-1);
 
     CLEANUP
+}
+
+UTEST(bigint,to_uint8) {
+    PREAMBLE;
+
+    uint8_t val = 255;
+
+    ASSERT_EQ(bigint_from_u8(&a,0),0);
+    ASSERT_EQ(bigint_to_u8(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u8(&a,255),0);
+    ASSERT_EQ(bigint_to_u8(&val,&a),0);
+    ASSERT_EQ(val,255);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_u8(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_int8) {
+    PREAMBLE;
+
+    int8_t val = 0x7F;
+
+    ASSERT_EQ(bigint_from_u8(&a,0),0);
+    ASSERT_EQ(bigint_to_i8(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u8(&a,0x7F),0);
+    ASSERT_EQ(bigint_to_i8(&val,&a),0);
+    ASSERT_EQ(val,0x7F);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_i8(&val,&a),1);
+
+    a.sign = 1;
+    ASSERT_EQ(bigint_to_i8(&val,&a),0);
+    ASSERT_EQ(val,-0x80);
+
+    ASSERT_EQ(bigint_dec(&a,&a),0);
+    ASSERT_EQ(bigint_to_i8(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_uint16) {
+    PREAMBLE;
+
+    uint16_t val = UINT16_MAX;
+
+    ASSERT_EQ(bigint_from_u16(&a,0),0);
+    ASSERT_EQ(bigint_to_u16(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u16(&a,UINT16_MAX),0);
+    ASSERT_EQ(bigint_to_u16(&val,&a),0);
+    ASSERT_EQ(val,UINT16_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_u16(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_int16) {
+    PREAMBLE;
+
+    int16_t val = INT16_MAX;
+
+    ASSERT_EQ(bigint_from_u16(&a,0),0);
+    ASSERT_EQ(bigint_to_i16(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u16(&a,INT16_MAX),0);
+    ASSERT_EQ(bigint_to_i16(&val,&a),0);
+    ASSERT_EQ(val,INT16_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_i16(&val,&a),1);
+
+    a.sign = 1;
+    ASSERT_EQ(bigint_to_i16(&val,&a),0);
+    ASSERT_EQ(val,INT16_MIN);
+
+    ASSERT_EQ(bigint_dec(&a,&a),0);
+    ASSERT_EQ(bigint_to_i16(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_uint32) {
+    PREAMBLE;
+
+    uint32_t val = UINT32_MAX;
+
+    ASSERT_EQ(bigint_from_u32(&a,0),0);
+    ASSERT_EQ(bigint_to_u32(&val,&a),0);
+    ASSERT_WEQ(val,0);
+
+    ASSERT_EQ(bigint_from_u32(&a,UINT32_MAX),0);
+    ASSERT_EQ(bigint_to_u32(&val,&a),0);
+    ASSERT_EQ(val,UINT32_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_u32(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_int32) {
+    PREAMBLE;
+
+    int32_t val = INT32_MAX;
+
+    ASSERT_EQ(bigint_from_u32(&a,0),0);
+    ASSERT_EQ(bigint_to_i32(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u32(&a,INT32_MAX),0);
+    ASSERT_EQ(bigint_to_i32(&val,&a),0);
+    ASSERT_EQ(val,INT32_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_i32(&val,&a),1);
+
+    a.sign = 1;
+    ASSERT_EQ(bigint_to_i32(&val,&a),0);
+    ASSERT_EQ(val,INT32_MIN);
+
+    ASSERT_EQ(bigint_dec(&a,&a),0);
+    ASSERT_EQ(bigint_to_i32(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_uint64) {
+    PREAMBLE;
+
+    uint64_t val = UINT64_MAX;
+
+    ASSERT_EQ(bigint_from_u64(&a,0),0);
+    ASSERT_EQ(bigint_to_u64(&val,&a),0);
+    ASSERT_WEQ(val,0);
+
+    ASSERT_EQ(bigint_from_u64(&a,UINT64_MAX),0);
+    ASSERT_EQ(bigint_to_u64(&val,&a),0);
+    ASSERT_EQ(val,UINT64_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_u64(&val,&a),1);
+
+    CLEANUP;
+}
+
+UTEST(bigint,to_int64) {
+    PREAMBLE;
+
+    int64_t val = INT64_MAX;
+
+    ASSERT_EQ(bigint_from_u64(&a,0),0);
+    ASSERT_EQ(bigint_to_i64(&val,&a),0);
+    ASSERT_EQ(val,0);
+
+    ASSERT_EQ(bigint_from_u64(&a,INT64_MAX),0);
+    ASSERT_EQ(bigint_to_i64(&val,&a),0);
+    ASSERT_EQ(val,INT64_MAX);
+
+    ASSERT_EQ(bigint_inc(&a,&a),0);
+    ASSERT_EQ(bigint_to_i64(&val,&a),1);
+
+    a.sign = 1;
+    ASSERT_EQ(bigint_to_i64(&val,&a),0);
+    ASSERT_EQ(val,INT64_MIN);
+
+    ASSERT_EQ(bigint_dec(&a,&a),0);
+    ASSERT_EQ(bigint_to_i64(&val,&a),1);
+
+    CLEANUP;
 }
 
 UTEST_MAIN();
