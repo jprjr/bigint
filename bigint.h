@@ -200,6 +200,12 @@ size_t bigint_to_string(char* str, size_t len, const bigint* b, unsigned int bas
 BIGINT_API
 int bigint_cmp(const bigint *a, const bigint *b);
 
+#define bigint_lt(a,b) (bigint_cmp((a),(b)) == -1)
+#define bigint_gt(a,b) (bigint_cmp((a),(b)) ==  1)
+#define bigint_eq(a,b) (bigint_cmp((a),(b)) ==  0)
+#define bigint_le(a,b) (bigint_cmp((a),(b)) !=  1)
+#define bigint_ge(a,b) (bigint_cmp((a),(b)) != -1)
+
 BIGINT_API
 int bigint_inc(bigint* c, const bigint *a);
 
